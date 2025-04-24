@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "126018435974",
+    "project_id": "mis-lugares-equipo-8",
+    "storage_bucket": "mis-lugares-equipo-8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:126018435974:android:f69aa9d6887478c8cb8a07",
+        "android_client_info": {
+          "package_name": "com.example.mislugares"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSK9UYVTTfHuSBhxze6zY3BrpBKS8R6qE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
