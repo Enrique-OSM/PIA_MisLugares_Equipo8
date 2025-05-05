@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MenuActivity extends AppCompatActivity {
     private String title;
+    private Button NuevoLugarButton;
     private Button MostrarLugaresButton;
     private Button PreferenciasButton;
     private Button AcercaDeButton;
@@ -25,6 +26,8 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void setup() {
+        title = "Menu";
+        NuevoLugarButton = findViewById(R.id.btn_nuevoLugar);
         MostrarLugaresButton = findViewById(R.id.btn_mostrar_lugares);
         PreferenciasButton = findViewById(R.id.btn_preferencias);
         AcercaDeButton = findViewById(R.id.btn_acerca_de);
@@ -33,12 +36,24 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void configurarbotones() {
+        NuevoLugarButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FormParaCrearLugar();
+            }
+        });
         SalirButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 CerrarSesion();
             }
         });
+    }
+
+    private void FormParaCrearLugar() {
+        Intent intent = new Intent(MenuActivity.this, FormActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void CerrarSesion() {

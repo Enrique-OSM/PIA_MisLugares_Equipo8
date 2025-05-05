@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="tipos_de_lugares">
+        <item>Restaurante</item>
+        <item>Escuela</item>
+        <item>Hotel</item>
+        <item>Sitio turistico</item>
+        <item>Otro</item>
+    </string-array>
+</resources>
