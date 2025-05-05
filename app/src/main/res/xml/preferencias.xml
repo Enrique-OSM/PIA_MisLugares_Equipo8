@@ -12,7 +12,7 @@
         android:summary="Limita el numero de lugares que se muetran"
         android:inputType="number"
         android:defaultValue="12" />
-    <listPreference
+    <ListPreference
         android:key="orden"
         android:title="criterio de ordenacion"
         android:summary="que lugares quieres que aparescan antes"
