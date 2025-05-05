@@ -42,12 +42,23 @@ public class MenuActivity extends AppCompatActivity {
                 FormParaCrearLugar();
             }
         });
+        PreferenciasButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MostrarPreferencias();
+            }
+        });
         SalirButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 CerrarSesion();
             }
         });
+    }
+
+    private void MostrarPreferencias() {
+        Intent intent = new Intent(MenuActivity.this, PreferenciasActivity.class);
+        startActivity(intent);
     }
 
     private void FormParaCrearLugar() {
