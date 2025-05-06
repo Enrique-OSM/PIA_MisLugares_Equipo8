@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "126018435974",
-    "project_id": "mis-lugares-equipo-8",
-    "storage_bucket": "mis-lugares-equipo-8.firebasestorage.app"
+    "project_number": "366147777136",
+    "project_id": "mis-lugares-d427a",
+    "storage_bucket": "mis-lugares-d427a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:126018435974:android:f69aa9d6887478c8cb8a07",
+        "mobilesdk_app_id": "1:366147777136:android:575c1bd40725f8c4363ab5",
         "android_client_info": {
           "package_name": "com.example.mislugares"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBSK9UYVTTfHuSBhxze6zY3BrpBKS8R6qE"
+          "current_key": "AIzaSyCIXM85wBdJvMNj1ShZwFy4egk8usQrdUU"
         }
       ],
       "services": {

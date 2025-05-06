@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -48,6 +47,12 @@ public class MenuActivity extends AppCompatActivity {
                 MostrarPreferencias();
             }
         });
+        AcercaDeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MostrarAcercaDe();
+            }
+        });
         SalirButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -58,6 +63,11 @@ public class MenuActivity extends AppCompatActivity {
 
     private void MostrarPreferencias() {
         Intent intent = new Intent(MenuActivity.this, PreferenciasActivity.class);
+        startActivity(intent);
+    }
+
+    private void MostrarAcercaDe() {
+        Intent intent = new Intent(MenuActivity.this, AcercaDeActivity.class);
         startActivity(intent);
     }
 
