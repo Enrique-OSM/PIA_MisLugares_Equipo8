@@ -1,5 +1,6 @@
 package com.example.mislugares;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -11,10 +12,16 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-//firebse imports
-
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FormActivity extends AppCompatActivity {
+    private String lugarId;
+    private FirebaseFirestore db;
     private String title;
     private EditText nombre;
     Spinner tipoDeLugar;
@@ -35,6 +42,10 @@ public class FormActivity extends AppCompatActivity {
     }
 
     private void setup() {
+        lugarId = getIntent().getStringExtra("lugarId");
+
+        db = FirebaseFirestore.getInstance();
+
         nombre = findViewById(R.id.nombre);
 
         tipoDeLugar = (Spinner) findViewById(R.id.tipo);
@@ -61,6 +72,7 @@ public class FormActivity extends AppCompatActivity {
         comentario = findViewById(R.id.comentario);
         guardarBtn = findViewById(R.id.guardar);
 
+
         ConfigurarBotones();
     }
 
@@ -74,16 +86,53 @@ public class FormActivity extends AppCompatActivity {
     }
 
     private void guardarLugar() {
-        if (nombre.getText().toString().isEmpty() ||
-                direccion.getText().toString().isEmpty() ||
-                telefono.getText().toString().isEmpty() ||
-                url.getText().toString().isEmpty() ||
-                tipoElecto.isEmpty() ||
-                comentario.getText().toString().isEmpty()){
+        FirebaseUser usuarioEmail = FirebaseAuth.getInstance().getCurrentUser();
+        String nombreStr = nombre.getText().toString();
+        String direccionStr = direccion.getText().toString();
+        String telefonoStr = telefono.getText().toString();
+        String urlStr = url.getText().toString();
+        String comentarioStr = comentario.getText().toString();
+
+        if (nombreStr.isEmpty() || direccionStr.isEmpty() || telefonoStr.isEmpty() ||
+                urlStr.isEmpty() || tipoElecto.isEmpty() || comentarioStr.isEmpty()) {
             Toast.makeText(FormActivity.this, "Por favor, ingrese todos los campos", Toast.LENGTH_SHORT).show();
+            return;
         }
-        else {
-            Toast.makeText(FormActivity.this, "Lugar guardado", Toast.LENGTH_SHORT).show();
+        
+        Map<String, Object> lugar = new HashMap<>();
+        lugar.put("usuarioEmail", usuarioEmail.getEmail());
+        lugar.put("nombre", nombreStr);
+        lugar.put("direccion", direccionStr);
+        lugar.put("telefono", telefonoStr);
+        lugar.put("url", urlStr);
+        lugar.put("tipo", tipoElecto);
+        lugar.put("comentario", comentarioStr);
+        lugar.put("imagen", "#");
+        lugar.put("fecha", FieldValue.serverTimestamp());
+
+        if (lugarId != null) {
+            // Editar documento existente
+            db.collection("lugares").document(lugarId)
+                    .update(lugar)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(FormActivity.this, "Lugar actualizado correctamente", Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+        } else {
+            // Crear nuevo documento
+            db.collection("lugares")
+                    .add(lugar)
+                    .addOnSuccessListener(documentReference -> {
+                        String nuevoLugarId = documentReference.getId();
+                        Intent intent = new Intent(FormActivity.this, ShowActivity.class);
+                        intent.putExtra("lugarId", nuevoLugarId);
+                        startActivity(intent);
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(FormActivity.this, "Error al guardar lugar", Toast.LENGTH_SHORT).show();
+                    });
+
         }
 
     }
