@@ -74,7 +74,6 @@ public class MenuActivity extends AppCompatActivity {
     private void FormParaCrearLugar() {
         Intent intent = new Intent(MenuActivity.this, FormActivity.class);
         startActivity(intent);
-        finish();
     }
 
     private void CerrarSesion() {
