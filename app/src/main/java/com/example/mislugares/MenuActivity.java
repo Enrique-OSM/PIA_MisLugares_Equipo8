@@ -41,6 +41,12 @@ public class MenuActivity extends AppCompatActivity {
                 FormParaCrearLugar();
             }
         });
+        MostrarLugaresButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MostrarLista();
+            }
+        });
         PreferenciasButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -59,6 +65,11 @@ public class MenuActivity extends AppCompatActivity {
                 CerrarSesion();
             }
         });
+    }
+
+    private void MostrarLista() {
+        Intent intent = new Intent(MenuActivity.this, ListaLugaresActivity.class);
+        startActivity(intent);
     }
 
     private void MostrarPreferencias() {
