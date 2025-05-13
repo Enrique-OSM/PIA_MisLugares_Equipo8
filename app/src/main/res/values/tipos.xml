@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="tipos_de_lugares">
+        <item>Otros</item>
         <item>Restaurante</item>
-        <item>Escuela</item>
+        <item>Bar</item>
+        <item>Cafe</item>
+        <item>Espectaculo</item>
         <item>Hotel</item>
-        <item>Sitio turistico</item>
-        <item>Otro</item>
+        <item>Compras</item>
+        <item>Educacion</item>
+        <item>Deporte</item>
+        <item>Naturaleza</item>
+        <item>Gasolineria</item>
     </string-array>
 </resources>

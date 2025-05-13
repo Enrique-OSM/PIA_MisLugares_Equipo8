@@ -12,24 +12,17 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.widget.EditText;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -59,6 +52,7 @@ public class ShowActivity extends AppCompatActivity {
     private ImageView camaraIcon;
     private ImageView galeryIcon;
     private ImageView fotoLugar;
+    private ImageView typeIcon;
 
 
 
@@ -98,6 +92,7 @@ public class ShowActivity extends AppCompatActivity {
         camaraIcon = findViewById(R.id.camaraicon);
         galeryIcon = findViewById(R.id.galeryicon);
         fotoLugar = findViewById(R.id.imageView);
+        typeIcon = findViewById(R.id.tipoIcon);
 
         //Asignamos los valores de la base de datos a los TextView
         // Verificamos que el lugarId no sea nulo
@@ -112,6 +107,8 @@ public class ShowActivity extends AppCompatActivity {
                             phoneText.setText(documentSnapshot.getString("telefono"));
                             paginaWebText.setText(documentSnapshot.getString("url"));
                             comentarioText.setText(documentSnapshot.getString("comentario"));
+
+                            actualizarIconoPorTipo(documentSnapshot.getString("tipo"));
 
                             Timestamp timestamp = documentSnapshot.getTimestamp("fecha");
                             if (timestamp != null) {
@@ -193,11 +190,13 @@ public class ShowActivity extends AppCompatActivity {
 
                     // Si quieres guardar la URL en Firestore después de subir:
                     storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        String url = uri.toString();
-
+                        String urlImage = uri.toString();
+                        Glide.with(this)
+                                .load(urlImage)
+                                .into(fotoLugar);
                         if (lugarId != null && !lugarId.isEmpty()) {
                             db.collection("lugares").document(lugarId)
-                                    .update("imagen", url)
+                                    .update("imagen", urlImage)
                                     .addOnSuccessListener(aVoid -> Toast.makeText(this, "URL guardada en Firestore", Toast.LENGTH_SHORT).show())
                                     .addOnFailureListener(e -> Toast.makeText(this, "Error al guardar URL", Toast.LENGTH_SHORT).show());
                         }
@@ -220,4 +219,43 @@ public class ShowActivity extends AppCompatActivity {
             Toast.makeText(this, "Permiso denegado para acceder a imágenes", Toast.LENGTH_SHORT).show();
         }
     }
+    private void actualizarIconoPorTipo(String tipoLugar) {
+        switch (tipoLugar) {
+            case "Bar":
+                typeIcon.setImageResource(R.drawable.tipo_icon_bar);
+                break;
+            case "Compras":
+                typeIcon.setImageResource(R.drawable.tipo_icon_compras);
+                break;
+            case "Cafe":
+                typeIcon.setImageResource(R.drawable.tipo_icon_cup);
+                break;
+            case "Deporte":
+                typeIcon.setImageResource(R.drawable.tipo_icon_deporte);
+                break;
+            case "Educacion":
+                typeIcon.setImageResource(R.drawable.tipo_icon_educacion);
+                break;
+            case "Espectaculo":
+                typeIcon.setImageResource(R.drawable.tipo_icon_espectaculo);
+                break;
+            case "Gasolineria":
+                typeIcon.setImageResource(R.drawable.tipo_icon_gas);
+                break;
+            case "Hotel":
+                typeIcon.setImageResource(R.drawable.tipo_icon_hotel);
+                break;
+            case "Naturaleza":
+                typeIcon.setImageResource(R.drawable.tipo_icon_naturaleza);
+                break;
+            case "Restaurante":
+                typeIcon.setImageResource(R.drawable.tipo_icon_restaurant);
+                break;
+            default:
+                typeIcon.setImageResource(R.drawable.tipo_icon_restaurant); // o algún ícono por defecto
+                break;
+        }
+    }
+
+
 }
