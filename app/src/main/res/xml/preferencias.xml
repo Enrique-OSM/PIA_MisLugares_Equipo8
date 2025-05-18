@@ -11,7 +11,7 @@
         android:title="Maximo de lugares a mostrar"
         android:summary="Limita el numero de lugares que se muetran"
         android:inputType="number"
-        android:defaultValue="12" />
+        android:defaultValue="4" />
     <ListPreference
         android:key="orden"
         android:title="criterio de ordenacion"
