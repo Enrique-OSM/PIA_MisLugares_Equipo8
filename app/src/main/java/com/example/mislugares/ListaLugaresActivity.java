@@ -1,5 +1,6 @@
 package com.example.mislugares;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -17,6 +18,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -25,7 +28,7 @@ import java.util.List;
 
 
 public class ListaLugaresActivity extends AppCompatActivity {
-
+    private ImageView toMap;
     private RecyclerView recyclerView;
     private LugarAdapter lugarAdapter;
 
@@ -36,6 +39,7 @@ public class ListaLugaresActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        toMap = findViewById(R.id.tomapview);
         recyclerView = findViewById(R.id.recyclerLugares);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -43,7 +47,7 @@ public class ListaLugaresActivity extends AppCompatActivity {
         recyclerView.setAdapter(lugarAdapter);
 
         String orden = sharedPreferences.getString("orden", "0"); // default es "0"
-        String maximoString = sharedPreferences.getString("maximo", "12");
+        String maximoString = sharedPreferences.getString("maximo", "4");
 
         try {
             int maximo = Integer.parseInt(maximoString);
@@ -63,7 +67,17 @@ public class ListaLugaresActivity extends AppCompatActivity {
         } catch (NumberFormatException e) {
             cargarLugaresDesdeFirestore(12);
         }
+        ConfigurarBotones();
+    }
 
+    private void ConfigurarBotones() {
+        toMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ListaLugaresActivity.this, MapsActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void cargarLugaresOrdenadosPorFecha(int limite) {

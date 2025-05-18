@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.Timestamp;
@@ -49,6 +51,8 @@ public class ShowActivity extends AppCompatActivity {
     private TextView comentarioText;
     private TextView fechaText;
     private TextView horaText;
+    private TextView volverbtn;
+    private TextView editarbtn;
     private ImageView camaraIcon;
     private ImageView galeryIcon;
     private ImageView fotoLugar;
@@ -93,10 +97,13 @@ public class ShowActivity extends AppCompatActivity {
         galeryIcon = findViewById(R.id.galeryicon);
         fotoLugar = findViewById(R.id.imageView);
         typeIcon = findViewById(R.id.tipoIcon);
-
+        volverbtn = findViewById(R.id.tvVolver);
+        editarbtn = findViewById(R.id.tvEditar);
+        Log.d("LugarID", "llego del recy fuera del if: " + lugarId);
         //Asignamos los valores de la base de datos a los TextView
         // Verificamos que el lugarId no sea nulo
         if (lugarId != null && !lugarId.isEmpty()) {
+            Log.d("LugarID", "llego del recy: " + lugarId);
             db.collection("lugares").document(lugarId).get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
@@ -121,9 +128,12 @@ public class ShowActivity extends AppCompatActivity {
                                 fechaText.setText(dateFormat.format(date));
                                 horaText.setText(timeFormat.format(date));
 
-//                                if(documentSnapshot.getString("imagen") != "#"){
-//                                    proximamente setear la imagen para cuando ya tenga imagen
-//                                }
+                                if(documentSnapshot.getString("imagen") != "#"){
+                                    setImagen(documentSnapshot.getString("imagen"));
+                                }
+                                else{
+                                }
+
                             } else {
                                 fechaText.setText("Sin fecha");
                                 horaText.setText("Sin hora");
@@ -140,6 +150,14 @@ public class ShowActivity extends AppCompatActivity {
         ConfigurarElementos();
     }
 
+    private void setImagen(String imagen) {
+        Log.d("ImagenURL", "Imagen: " + imagen);
+        Glide.with(this)
+                .load(imagen)
+                .placeholder(R.mipmap.imagedefault)
+                .into(fotoLugar);
+    }
+
     private void ConfigurarElementos() {
         camaraIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,6 +169,23 @@ public class ShowActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 subirImagenGaleria();
+            }
+        });
+        volverbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ShowActivity.this, MenuActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        editarbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ShowActivity.this, FormActivity.class);
+                intent.putExtra("lugarId", lugarId);
+                startActivity(intent);
+                finish();
             }
         });
     }

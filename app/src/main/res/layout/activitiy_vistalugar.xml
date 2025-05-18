@@ -11,6 +11,37 @@
         android:orientation="vertical">
 
 
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#2823bc"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:weightSum="2">
+
+        <TextView
+            android:id="@+id/tvVolver"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Volver"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:gravity="start" />
+
+        <TextView
+            android:id="@+id/tvEditar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Editar"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:gravity="end" />
+    </LinearLayout>
+
         <TextView
             android:id="@+id/NombreLugarTxt"
             android:layout_width="match_parent"

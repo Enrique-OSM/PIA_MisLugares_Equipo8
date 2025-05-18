@@ -1,4 +1,7 @@
 package com.example.mislugares;
+
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
-
-import com.example.mislugares.R;
-import com.example.mislugares.Lugar;
 
 public class LugarAdapter extends RecyclerView.Adapter<LugarAdapter.LugarViewHolder> {
     private List<Lugar> listaLugares;
@@ -37,7 +37,7 @@ public class LugarAdapter extends RecyclerView.Adapter<LugarAdapter.LugarViewHol
         holder.ratingBar.setRating(lugar.getValoracion());
 
         // Cargar ícono en base al tipo
-        switch (lugar.getTipo().toLowerCase()) {
+        switch (lugar.getTipo()) {
             case "Bar":
                 holder.icono.setImageResource(R.drawable.tipo_icon_bar);
                 break;
@@ -59,7 +59,7 @@ public class LugarAdapter extends RecyclerView.Adapter<LugarAdapter.LugarViewHol
             case "Gasolineria":
                 holder.icono.setImageResource(R.drawable.tipo_icon_gas);
                 break;
-            case "hotel":
+            case "Hotel":
                 holder.icono.setImageResource(R.drawable.tipo_icon_hotel);
                 break;
             case "Naturaleza":
@@ -69,8 +69,16 @@ public class LugarAdapter extends RecyclerView.Adapter<LugarAdapter.LugarViewHol
                 holder.icono.setImageResource(R.drawable.tipo_icon_restaurant);
                 break;
             default:
-                holder.icono.setImageResource(R.drawable.ic_launcher_background); // ícono por defecto
+                holder.icono.setImageResource(R.drawable.tipo_icon_restaurant);
         }
+
+        // 👉 CLICK: lanzar la actividad
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), ShowActivity.class);
+            Log.d("LugarID", "El valor es: " + lugar.getId());
+            intent.putExtra("lugarId", lugar.getId());
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override
