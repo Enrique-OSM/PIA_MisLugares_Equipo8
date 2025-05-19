@@ -132,52 +132,51 @@ public class FormActivity extends AppCompatActivity {
                     Log.d("Ubicación", "LatLng: " + latLng.latitude + ", " + latLng.longitude);
                     // Puedes mover el mapa a esta posición o guardar la ubicación
                     latitud = latLng.latitude;
+                    longitud = latLng.longitude;
+                    Map<String, Object> lugar = new HashMap<>();
+                    lugar.put("usuarioEmail", usuarioEmail.getEmail());
+                    lugar.put("nombre", nombreStr);
+                    lugar.put("direccion", direccionStr);
+                    lugar.put("telefono", telefonoStr);
+                    lugar.put("url", urlStr);
+                    lugar.put("tipo", tipoElecto);
+                    lugar.put("comentario", comentarioStr);
+                    lugar.put("fecha", FieldValue.serverTimestamp());
+                    lugar.put("latitud", latitud);
+                    lugar.put("longitud", longitud);
+
+                    if (lugarId != null) {
+                        // Editar documento existente
+                        db.collection("lugares").document(lugarId)
+                                .update(lugar)
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(FormActivity.this, "Lugar actualizado correctamente", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(FormActivity.this, ShowActivity.class);
+                                    intent.putExtra("lugarId", lugarId);
+                                    startActivity(intent);
+                                    finish();
+                                });
+                    } else {
+                        // Crear nuevo documento
+                        lugar.put("imagen", "#");
+                        db.collection("lugares")
+                                .add(lugar)
+                                .addOnSuccessListener(documentReference -> {
+                                    String nuevoLugarId = documentReference.getId();
+                                    Intent intent = new Intent(FormActivity.this, ShowActivity.class);
+                                    intent.putExtra("lugarId", nuevoLugarId);
+                                    startActivity(intent);
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(FormActivity.this, "Error al guardar lugar", Toast.LENGTH_SHORT).show();
+                                });
+
+                    }
                 } else {
                     Log.d("Ubicación", "No se encontró la ubicación.");
                 }
             });
         });
-
-
-        Map<String, Object> lugar = new HashMap<>();
-        lugar.put("usuarioEmail", usuarioEmail.getEmail());
-        lugar.put("nombre", nombreStr);
-        lugar.put("direccion", direccionStr);
-        lugar.put("telefono", telefonoStr);
-        lugar.put("url", urlStr);
-        lugar.put("tipo", tipoElecto);
-        lugar.put("comentario", comentarioStr);
-        lugar.put("fecha", FieldValue.serverTimestamp());
-        lugar.put("latitud", );
-
-        if (lugarId != null) {
-            // Editar documento existente
-            db.collection("lugares").document(lugarId)
-                    .update(lugar)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(FormActivity.this, "Lugar actualizado correctamente", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(FormActivity.this, ShowActivity.class);
-                        intent.putExtra("lugarId", lugarId);
-                        startActivity(intent);
-                        finish();
-                    });
-        } else {
-            // Crear nuevo documento
-            lugar.put("imagen", "#");
-            db.collection("lugares")
-                    .add(lugar)
-                    .addOnSuccessListener(documentReference -> {
-                        String nuevoLugarId = documentReference.getId();
-                        Intent intent = new Intent(FormActivity.this, ShowActivity.class);
-                        intent.putExtra("lugarId", nuevoLugarId);
-                        startActivity(intent);
-                        finish();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(FormActivity.this, "Error al guardar lugar", Toast.LENGTH_SHORT).show();
-                    });
-
-        }
-
     }
 }

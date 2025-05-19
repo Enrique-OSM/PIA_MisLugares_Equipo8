@@ -1,8 +1,13 @@
 package com.example.mislugares;
 
+import androidx.annotation.DrawableRes;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -11,6 +16,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -64,38 +70,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Habilitar gestos para mover el mapa si aún no están habilitados (opcional, usualmente ya están por defecto)
         mMap.getUiSettings().setScrollGesturesEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
-//        FirebaseFirestore db = FirebaseFirestore.getInstance();
-//
-//        db.collection("lugares")
-//                .get()
-//                .addOnSuccessListener(queryDocumentSnapshots -> {
-//                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-//                        String tipo = document.getString("tipo");
-//                        String direccion = document.getString("direccion");
-//                        LatLng ubicacion = getLocationFromAddress(direccion);
-//                        mMap.addMarker(new MarkerOptions()
-//                                .position(ubicacion)
-//                                .title(tipo));
-//                    }
-//                });
-    }
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-//    private LatLng getLocationFromAddress(Context context, String strAddress) {
-//        Geocoder coder = new Geocoder(context);
-//        List<Address> addressList;
-//
-//        try {
-//            addressList = coder.getFromLocationName(strAddress, 1);
-//            if (addressList != null && !addressList.isEmpty()) {
-//                Address location = addressList.get(0);
-//                return new LatLng(location.getLatitude(), location.getLongitude());
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return null;
-//    }
+        db.collection("lugares")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        String nombreLugar = document.getString("nombre");
+                        String tipo = document.getString("tipo");
+                        String direccion = document.getString("direccion");
+                        LatLng ubicacion = new LatLng(document.getDouble("latitud"), document.getDouble("longitud"));
+                        int iconoResId = obtenerIconoPorTipo(tipo);
+                        BitmapDescriptor iconoPersonalizado = vectorToBitmap(iconoResId);
+                        mMap.addMarker(new MarkerOptions()
+                                .position(ubicacion)
+                                .title(nombreLugar).snippet(direccion).icon(iconoPersonalizado));
+                    }
+                });
+    }
 
     private int obtenerIconoPorTipo(String tipo) {
         switch (tipo) {
@@ -123,5 +115,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return R.drawable.tipo_icon_hotel;
         }
     }
+    private BitmapDescriptor vectorToBitmap(@DrawableRes int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(this, vectorResId);
+        if (vectorDrawable == null) {
+            return BitmapDescriptorFactory.defaultMarker();
+        }
 
+        // Tamaño deseado en píxeles (ajusta según lo que se vea bien en el mapa)
+        int width = 96;  // por ejemplo 96x96 px
+        int height = 96;
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
 }
