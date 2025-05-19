@@ -2,6 +2,7 @@ package com.example.mislugares;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -25,6 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class FormActivity extends AppCompatActivity {
+    private double latitud = 0.0;
+    private double longitud = 0.0;
     private String lugarId;
     private FirebaseFirestore db;
     private String title;
@@ -109,6 +112,7 @@ public class FormActivity extends AppCompatActivity {
     }
 
     private void guardarLugar() {
+
         FirebaseUser usuarioEmail = FirebaseAuth.getInstance().getCurrentUser();
         String nombreStr = nombre.getText().toString();
         String direccionStr = direccion.getText().toString();
@@ -121,7 +125,20 @@ public class FormActivity extends AppCompatActivity {
             Toast.makeText(FormActivity.this, "Por favor, ingrese todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
+        LocationUtils.getLatLngFromAddress(this, direccionStr, latLng -> {
+            runOnUiThread(() -> {
+                if (latLng != null) {
+                    Log.d("Ubicación", "LatLng: " + latLng.latitude + ", " + latLng.longitude);
+                    // Puedes mover el mapa a esta posición o guardar la ubicación
+                    latitud = latLng.latitude;
+                } else {
+                    Log.d("Ubicación", "No se encontró la ubicación.");
+                }
+            });
+        });
+
+
         Map<String, Object> lugar = new HashMap<>();
         lugar.put("usuarioEmail", usuarioEmail.getEmail());
         lugar.put("nombre", nombreStr);
@@ -131,6 +148,7 @@ public class FormActivity extends AppCompatActivity {
         lugar.put("tipo", tipoElecto);
         lugar.put("comentario", comentarioStr);
         lugar.put("fecha", FieldValue.serverTimestamp());
+        lugar.put("latitud", );
 
         if (lugarId != null) {
             // Editar documento existente

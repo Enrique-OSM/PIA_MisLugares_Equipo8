@@ -2,6 +2,9 @@ package com.example.mislugares;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -14,6 +17,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.mislugares.databinding.ActivityMapsBinding;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.io.IOException;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -58,30 +64,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Habilitar gestos para mover el mapa si aún no están habilitados (opcional, usualmente ya están por defecto)
         mMap.getUiSettings().setScrollGesturesEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("lugares")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        String tipo = document.getString("tipo");
-                        String direccion = document.getString("direccion");
-
-                        // Si ya tienes lat y lng, sáltate el geocoding
-                        double lat = document.getDouble("lat");
-                        double lng = document.getDouble("lng");
-
-                        LatLng ubicacion = new LatLng(lat, lng);
-
-                        int iconoResId = obtenerIconoPorTipo(tipo);
-
-                        mMap.addMarker(new MarkerOptions()
-                                .position(ubicacion)
-                                .title(tipo)
-                                .icon(BitmapDescriptorFactory.fromResource(iconoResId)));
-                    }
-                });
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection("lugares")
+//                .get()
+//                .addOnSuccessListener(queryDocumentSnapshots -> {
+//                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+//                        String tipo = document.getString("tipo");
+//                        String direccion = document.getString("direccion");
+//                        LatLng ubicacion = getLocationFromAddress(direccion);
+//                        mMap.addMarker(new MarkerOptions()
+//                                .position(ubicacion)
+//                                .title(tipo));
+//                    }
+//                });
     }
+
+//    private LatLng getLocationFromAddress(Context context, String strAddress) {
+//        Geocoder coder = new Geocoder(context);
+//        List<Address> addressList;
+//
+//        try {
+//            addressList = coder.getFromLocationName(strAddress, 1);
+//            if (addressList != null && !addressList.isEmpty()) {
+//                Address location = addressList.get(0);
+//                return new LatLng(location.getLatitude(), location.getLongitude());
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return null;
+//    }
+
     private int obtenerIconoPorTipo(String tipo) {
         switch (tipo) {
             case "Restaurante":
