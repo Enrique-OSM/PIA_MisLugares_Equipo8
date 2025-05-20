@@ -4,13 +4,11 @@ import androidx.annotation.DrawableRes;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,6 +29,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
+    private double selectedLatitude;
+    private double selectedLongitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,16 +57,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        selectedLatitude = getIntent().getDoubleExtra("latitud", 0.0);
+        selectedLongitude = getIntent().getDoubleExtra("longitud", 0.0);
 
-        // Coordenadas de Monterrey, México
-        LatLng monterrey = new LatLng(25.6866, -100.3161);
+        Log.d("MapsActivity", "Latitud seleccionada: " + selectedLatitude);
+        Log.d("MapsActivity", "Longitud seleccionada: " + selectedLongitude);
 
-        // Añadir un marcador en Monterrey
-        mMap.addMarker(new MarkerOptions().position(monterrey).title("Monterrey, México"));
+        if (selectedLatitude != 0.0 && selectedLongitude != 0.0) {
+            LatLng sitioSeleccionado = new LatLng(selectedLatitude, selectedLongitude);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sitioSeleccionado, 15));
+        }
+        else {
+            LatLng monterrey = new LatLng(25.6866, -100.3161);
+            // Añadir un marcador en Monterrey
+            mMap.addMarker(new MarkerOptions().position(monterrey).title("Monterrey, México"));
 
-        // Mover la cámara a Monterrey con un zoom adecuado
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(monterrey, 12));
-
+            // Mover la cámara a Monterrey con un zoom adecuado
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(monterrey, 12));
+        }
         // Habilitar gestos para mover el mapa si aún no están habilitados (opcional, usualmente ya están por defecto)
         mMap.getUiSettings().setScrollGesturesEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);

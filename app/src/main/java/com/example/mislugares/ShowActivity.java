@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -42,7 +43,6 @@ public class ShowActivity extends AppCompatActivity {
 
     private String lugarId;
     private FirebaseFirestore db;
-    private String title;
     private TextView nombreLugarTxt;
     private TextView tipoText;
     private TextView direccionText;
@@ -57,8 +57,7 @@ public class ShowActivity extends AppCompatActivity {
     private ImageView galeryIcon;
     private ImageView fotoLugar;
     private ImageView typeIcon;
-
-
+    private LatLng lugarUbicacion;
 
 
     @Override
@@ -131,8 +130,7 @@ public class ShowActivity extends AppCompatActivity {
                                 if(documentSnapshot.getString("imagen") != "#"){
                                     setImagen(documentSnapshot.getString("imagen"));
                                 }
-                                else{
-                                }
+                                lugarUbicacion = new LatLng(documentSnapshot.getDouble("latitud"), documentSnapshot.getDouble("longitud"));
 
                             } else {
                                 fechaText.setText("Sin fecha");
@@ -184,6 +182,18 @@ public class ShowActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(ShowActivity.this, FormActivity.class);
                 intent.putExtra("lugarId", lugarId);
+                startActivity(intent);
+                finish();
+            }
+        });
+        direccionText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                double latitud = lugarUbicacion.latitude;
+                double longitud = lugarUbicacion.longitude;
+                Intent intent = new Intent(ShowActivity.this, MapsActivity.class);
+                intent.putExtra("latitud", latitud);
+                intent.putExtra("longitud", longitud);
                 startActivity(intent);
                 finish();
             }
