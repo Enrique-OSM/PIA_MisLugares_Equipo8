@@ -15,6 +15,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,10 +27,18 @@ import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import java.text.SimpleDateFormat;
@@ -40,6 +49,8 @@ import java.util.Locale;
 public class ShowActivity extends AppCompatActivity {
     private static final int PERMISSION_CODE = 101;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private ActivityResultLauncher<Intent> cameraLauncher; // Nuevo launcher para la cámara
+    private Uri cameraImageUri; // Variable para el Uri de la cámara
 
     private String lugarId;
     private FirebaseFirestore db;
@@ -53,11 +64,13 @@ public class ShowActivity extends AppCompatActivity {
     private TextView horaText;
     private TextView volverbtn;
     private TextView editarbtn;
+    private RatingBar ratingBar;
     private ImageView camaraIcon;
     private ImageView galeryIcon;
     private ImageView fotoLugar;
     private ImageView typeIcon;
     private LatLng lugarUbicacion;
+
 
 
     @Override
@@ -73,7 +86,19 @@ public class ShowActivity extends AppCompatActivity {
                     }
                 }
         );
-
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // La imagen ya está guardada en 'cameraImageUri'
+                        if (cameraImageUri != null) {
+                            subirImagenAFirebase(cameraImageUri);
+                        } else {
+                            Toast.makeText(this, "Error al capturar la imagen de la cámara", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+        );
         setup();
     }
 
@@ -92,6 +117,7 @@ public class ShowActivity extends AppCompatActivity {
         comentarioText = findViewById(R.id.comentarioText);
         fechaText = findViewById(R.id.fechaText);
         horaText = findViewById(R.id.horaText);
+        ratingBar = findViewById(R.id.ratingBar);
         camaraIcon = findViewById(R.id.camaraicon);
         galeryIcon = findViewById(R.id.galeryicon);
         fotoLugar = findViewById(R.id.imageView);
@@ -160,7 +186,12 @@ public class ShowActivity extends AppCompatActivity {
         camaraIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(ShowActivity.this, "se activa la camara para tomar una foto", Toast.LENGTH_SHORT).show();
+                // Pedir permiso de cámara
+                if (ContextCompat.checkSelfPermission(ShowActivity.this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    abrirCamara();
+                } else {
+                    ActivityCompat.requestPermissions(ShowActivity.this, new String[]{android.Manifest.permission.CAMERA}, PERMISSION_CODE);
+                }
             }
         });
         galeryIcon.setOnClickListener(new View.OnClickListener() {
@@ -172,6 +203,8 @@ public class ShowActivity extends AppCompatActivity {
         volverbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                float valoracion = ratingBar.getRating();
+                guardarValoracionEnFirestore(lugarId, valoracion);
                 Intent intent = new Intent(ShowActivity.this, MenuActivity.class);
                 startActivity(intent);
                 finish();
@@ -219,6 +252,136 @@ public class ShowActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void guardarValoracionEnFirestore(String lugarId, float valoracion) {
+        // Creamos un nuevo documento de valoración o actualizamos uno existente para el usuario actual
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+
+        FirebaseUser currentUser = auth.getCurrentUser();
+        Map<String, Object> data = new HashMap<>();
+        data.put("valoracion", valoracion);
+        data.put("usuarioId", currentUser.getEmail()); // ¡Importante! Identificar al usuario
+
+        // Puedes tener una subcolección "valoraciones" dentro del documento del lugar
+        db.collection("lugares").document(lugarId)
+                .collection("valoraciones")
+                .document(currentUser.getUid()) // Usamos el ID del usuario como ID del documento de valoración
+                .set(data)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(ShowActivity.this, "Valoración guardada", Toast.LENGTH_SHORT).show();
+                    // Opcional: Actualizar la valoración promedio del lugar
+                    actualizarValoracionPromedio(lugarId);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ShowActivity.this, "Error al guardar la valoración", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                });
+    }
+
+    private void actualizarValoracionPromedio(String lugarId) {
+        db.collection("lugares").document(lugarId)
+                .collection("valoraciones")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        double sumaValoraciones = 0;
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            Number val = doc.getDouble("valoracion");
+                            if (val != null) {
+                                sumaValoraciones += val.doubleValue();
+                            }
+                        }
+                        double promedio = sumaValoraciones / queryDocumentSnapshots.size();
+
+                        // Actualizamos el campo "valoracionPromedio" en el documento del lugar
+                        Map<String, Object> promedioData = new HashMap<>();
+                        promedioData.put("valoracionPromedio", promedio);
+                        db.collection("lugares").document(lugarId)
+                                .update(promedioData)
+                                .addOnFailureListener(e -> Log.e("FirestoreError", "Error al actualizar promedio", e));
+                    } else {
+                        // Si no hay valoraciones, puedes establecer el promedio en 0 o null
+                        Map<String, Object> promedioData = new HashMap<>();
+                        promedioData.put("valoracionPromedio", 0.0);
+                        db.collection("lugares").document(lugarId).update(promedioData);
+                    }
+                });
+    }
+
+    private void abrirCamara() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Asegurarse de que haya una actividad de cámara para manejar el intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Crear el archivo donde la foto debería ir
+            File photoFile = null;
+            try {
+                photoFile = crearArchivoImagen();
+            } catch (IOException ex) {
+                // Error al crear el archivo
+                Toast.makeText(this, "Error al crear archivo para la foto", Toast.LENGTH_SHORT).show();
+                Log.e("ShowActivity", "Error creando archivo de imagen: " + ex.getMessage());
+            }
+
+            // Continuar solo si el archivo fue creado exitosamente
+            if (photoFile != null) {
+                cameraImageUri = androidx.core.content.FileProvider.getUriForFile(this,
+                        getApplicationContext().getPackageName() + ".fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
+                cameraLauncher.launch(takePictureIntent);
+            }
+        } else {
+            Toast.makeText(this, "No se encontró aplicación de cámara", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private File crearArchivoImagen() throws IOException {
+        // Crear un nombre de archivo de imagen único
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES); // Guarda en Pictures
+        File image = File.createTempFile(
+                imageFileName,  /* prefijo */
+                ".jpg",         /* sufijo */
+                storageDir      /* directorio */
+        );
+        return image;
+    }
+
+    // Sobreescribir onRequestPermissionsResult para manejar el permiso de cámara
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PERMISSION_CODE) {
+            // Verificar si todos los permisos fueron concedidos
+            boolean allPermissionsGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allPermissionsGranted = false;
+                    break;
+                }
+            }
+
+            if (allPermissionsGranted) {
+                // Determinar qué permiso(s) fueron concedidos y realizar la acción correspondiente
+                if (Arrays.asList(permissions).contains(android.Manifest.permission.CAMERA)) {
+                    // El permiso de la cámara fue concedido, abrir la cámara
+                    abrirCamara();
+                } else if (Arrays.asList(permissions).contains(android.Manifest.permission.READ_MEDIA_IMAGES) ||
+                        Arrays.asList(permissions).contains(android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    // El permiso de la galería fue concedido, abrir la galería
+                    subirImagenGaleria();
+                }
+                //Si se otorgan ambos permisos, se ejecutará primero la cámara, ya que está primero en la condición.
+            } else {
+                // Si algún permiso fue denegado, mostrar un mensaje
+                Toast.makeText(this, "Permiso denegado.", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void subirImagenGaleria() {
@@ -273,18 +436,6 @@ public class ShowActivity extends AppCompatActivity {
                 });
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == PERMISSION_CODE && grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            subirImagenGaleria();
-        } else {
-            Toast.makeText(this, "Permiso denegado para acceder a imágenes", Toast.LENGTH_SHORT).show();
-        }
-    }
     private void actualizarIconoPorTipo(String tipoLugar) {
         switch (tipoLugar) {
             case "Bar":
