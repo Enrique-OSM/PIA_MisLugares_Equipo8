@@ -198,6 +198,27 @@ public class ShowActivity extends AppCompatActivity {
                 finish();
             }
         });
+        phoneText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String phoneNumber = phoneText.getText().toString();
+                Intent dialIntent = new Intent(Intent.ACTION_DIAL);
+                dialIntent.setData(Uri.parse("tel:" + phoneNumber));
+                if (dialIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(dialIntent);
+                } else {
+                    Toast.makeText(ShowActivity.this, "No se puede realizar la llamada", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        paginaWebText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String url = paginaWebText.getText().toString();
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            }
+        });
     }
 
     private void subirImagenGaleria() {
