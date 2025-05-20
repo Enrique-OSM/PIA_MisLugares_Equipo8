@@ -120,7 +120,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case "Gasolineria":
                 return R.drawable.tipo_icon_gas;
             default:
-                return R.drawable.tipo_icon_hotel;
+                return R.drawable.ic_locationicon;
         }
     }
     private BitmapDescriptor vectorToBitmap(@DrawableRes int vectorResId) {

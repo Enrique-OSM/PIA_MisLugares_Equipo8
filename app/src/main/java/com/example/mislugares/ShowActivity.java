@@ -469,7 +469,7 @@ public class ShowActivity extends AppCompatActivity {
                 typeIcon.setImageResource(R.drawable.tipo_icon_restaurant);
                 break;
             default:
-                typeIcon.setImageResource(R.drawable.tipo_icon_restaurant); // o algún ícono por defecto
+                typeIcon.setImageResource(R.drawable.ic_locationicon); // o algún ícono por defecto
                 break;
         }
     }
