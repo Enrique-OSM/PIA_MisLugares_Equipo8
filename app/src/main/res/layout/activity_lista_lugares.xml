@@ -7,22 +7,27 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"> <!-- Puedes agregar padding si deseas -->
-
+        android:layout_height="?attr/actionBarSize" android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:gravity="center_vertical"
+        android:background="#2823bc">
         <TextView
-            android:id="@+id/ListaLugaresTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Mis Lugares" />
+        android:id="@+id/ListaLugaresTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Mis Lugares"
+        android:textColor="@android:color/white" android:textSize="20sp"
+        android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/tomapview"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            app:srcCompat="@drawable/map_svgrepo_com" />
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:srcCompat="@drawable/map_svgrepo_com"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
