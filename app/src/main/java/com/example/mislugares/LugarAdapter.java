@@ -69,7 +69,7 @@ public class LugarAdapter extends RecyclerView.Adapter<LugarAdapter.LugarViewHol
                 holder.icono.setImageResource(R.drawable.tipo_icon_restaurant);
                 break;
             default:
-                holder.icono.setImageResource(R.drawable.tipo_icon_restaurant);
+                holder.icono.setImageResource(R.drawable.ic_locationicon);
         }
 
         // 👉 CLICK: lanzar la actividad
